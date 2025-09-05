@@ -5,7 +5,7 @@ FastMCP Echo Server
 from fastmcp import FastMCP
 
 # Create server
-mcp = FastMCP("Echo Server")
+mcp = FastMCP("Echo Server", stateless_http=True)
 
 
 @mcp.tool
@@ -15,4 +15,4 @@ def echo(text: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="http", host="localhost", port=3000)
