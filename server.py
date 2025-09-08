@@ -5,7 +5,7 @@ MCP Server Template
 from mcp.server.fastmcp import FastMCP
 
 # Create server
-mcp = FastMCP("Echo Server", stateless_http=True)
+mcp = FastMCP("Echo Server")
 
 
 @mcp.tool()
