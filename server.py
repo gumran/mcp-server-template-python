@@ -5,7 +5,7 @@ MCP Server Template
 from mcp.server.fastmcp import FastMCP
 
 # Create server
-mcp = FastMCP("Echo Server")
+mcp = FastMCP("Echo Server", port=3000, stateless_http=True)
 
 
 @mcp.tool()
@@ -15,4 +15,4 @@ def echo(text: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run("streamable-http")
+    mcp.run(transport="streamable-http")
