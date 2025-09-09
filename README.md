@@ -44,3 +44,7 @@ npx @modelcontextprotocol/inspector
 ```
 
 The inspector server will start up and the UI will be accessible at http://localhost:6274.
+
+You can test your server locally by selecting:
+- Transport Type: Streamable HTTP
+- URL: http://127.0.0.1:3000/mcp
