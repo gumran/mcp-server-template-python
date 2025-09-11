@@ -3,7 +3,7 @@
 A very simple Python template for building MCP servers using Streamable HTTP transport.
 
 ## Overview
-This template provides a foundation for creating MCP servers that can communicate with AI assistants and other MCP clients. It includes a simple HTTP server implementation with example tools, resource & prompts to help you get started building your own MCP integrations.
+This template provides a foundation for creating MCP servers that can communicate with AI assistants and other MCP clients. It includes a simple HTTP server implementation with example tools, resources & prompts to help you get started building your own MCP integrations.
 
 ## Prerequisites
 - Install uv (https://docs.astral.sh/uv/getting-started/installation/)
@@ -48,3 +48,56 @@ The inspector server will start up and the UI will be accessible at http://local
 You can test your server locally by selecting:
 - Transport Type: Streamable HTTP
 - URL: http://127.0.0.1:3000/mcp
+
+## Development
+
+### Adding New Tools
+
+To add a new tool, modify `server.py`:
+
+```python
+@mcp.tool(
+    title="Your Tool Name",
+    description="Tool Description for the LLM",
+)
+async def new_tool(
+    tool_param1: str = Field(description="The description of the param1 for the LLM"), 
+    tool_param2: float = Field(description="The description of the param2 for the LLM") 
+)-> str:
+    """The new tool underlying method"""
+    result = await some_api_call(tool_param1, tool_param2)
+    return result
+```
+
+### Adding New Resources
+
+To add a new resource, modify `server.py`:
+
+```python
+@mcp.resource(
+    uri="your-scheme://{param1}/{param2}",
+    description="Description of what this resource provides",
+    name="Your Resource Name",
+)
+def your_resource(param1: str, param2: str) -> str:
+    """The resource template implementation"""
+    # Your resource logic here
+    return f"Resource content for {param1} and {param2}"
+```
+
+The URI template uses `{param_name}` syntax to define parameters that will be extracted from the resource URI and passed to your function.
+
+### Adding New Prompts
+
+To add a new prompt , modify `server.py`:
+
+```python
+@mcp.prompt("")
+async def your_prompt(
+    prompt_param: str = Field(description="The description of the param for the user")
+) -> str:
+    """Generate a helpful prompt"""
+
+    return f"You are a friendly assistant, help the user and don't forget to {prompt_param}."
+
+```

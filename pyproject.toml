@@ -7,5 +7,6 @@ requires-python = ">=3.13"
 authors = [{ name = "Alpic" }]
 keywords = ["mcp", "llm", "alpic", "python"]
 dependencies = [
+    "black>=25.1.0",
     "mcp",
 ]
