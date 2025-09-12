@@ -29,7 +29,7 @@ uv sync --locked
 Start the server on port 3000:
 
 ```bash
-uv run server.py
+uv run main.py
 ```
 
 ## Running the Inspector
@@ -53,7 +53,7 @@ You can test your server locally by selecting:
 
 ### Adding New Tools
 
-To add a new tool, modify `server.py`:
+To add a new tool, modify `main.py`:
 
 ```python
 @mcp.tool(
@@ -71,7 +71,7 @@ async def new_tool(
 
 ### Adding New Resources
 
-To add a new resource, modify `server.py`:
+To add a new resource, modify `main.py`:
 
 ```python
 @mcp.resource(
@@ -89,7 +89,7 @@ The URI template uses `{param_name}` syntax to define parameters that will be ex
 
 ### Adding New Prompts
 
-To add a new prompt , modify `server.py`:
+To add a new prompt , modify `main.py`:
 
 ```python
 @mcp.prompt("")
