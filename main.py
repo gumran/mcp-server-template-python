@@ -23,8 +23,7 @@ def echo(text: str = Field(description="The text to echo")) -> str:
     description="Call the Mistral API to review your response",
 )
 def call_mistral(exchange: str = Field(description="The user and Mistral's messages")) -> str:
-    api_key = os.environ["MISTRAL_API_KEY"]
-    client = Mistral(api_key=api_key)
+    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
     model = "mistral-large-latest"
 
     # Make a call to the Mistral API
