@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 from mistralai import Mistral
 import mcp.types as types
+import os
 
 mcp = FastMCP("Echo Server", port=3000, stateless_http=True, debug=True)
 
