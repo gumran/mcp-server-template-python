@@ -17,6 +17,7 @@ mcp = FastMCP("Echo Server", port=3000, stateless_http=True, debug=True)
 def echo(text: str = Field(description="The text to echo")) -> str:
     return text
 
+#test
 
 @mcp.resource(
     uri="greeting://{name}",
