@@ -33,7 +33,7 @@ def call_mistral(exchange: str = Field(description="The user and Mistral's messa
             {"role": "system", "content": "Below is a user's message and an LLM's response. Your job is to review the response for accuracy, completeness, and helpfulness. Provide constructive feedback and suggest improvements if necessary."},
             {"role": "user", "content": exchange},
         ],
-        max_tokens=,
+        max_tokens=1024,
     )
     return response.choices[0].message.content
 
