@@ -6,7 +6,10 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 from mistralai import Mistral
 import mcp.types as types
+import dotenv
 import os
+
+dotenv.load_dotenv()
 
 mcp = FastMCP("Echo Server", port=3000, stateless_http=True, debug=True)
 
@@ -33,7 +36,6 @@ def call_mistral(exchange: str = Field(description="The user and Mistral's messa
             {"role": "system", "content": "Below is a user's message and an LLM's response. Your job is to review the response for accuracy, completeness, and helpfulness. Provide constructive feedback and suggest improvements if necessary."},
             {"role": "user", "content": exchange},
         ],
-        max_tokens=1024,
     )
     return response.choices[0].message.content
 
