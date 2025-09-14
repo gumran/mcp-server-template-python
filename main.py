@@ -13,8 +13,8 @@ temperature = 1.3
     title="LLM Call",
     description="Call another LLM and return its response.",
 )
-async def original_response(query: str = Field(description="The user's query")) -> str:
-    response = await client.chat.complete_async(
+def original_response(query: str = Field(description="The user's query")) -> str:
+    response = client.chat.complete(
         model=model,
         messages=[
             {"role": "user", "content": query},
@@ -27,9 +27,9 @@ async def original_response(query: str = Field(description="The user's query")) 
     title="Answer Review",
     description="Get a judge's review of an answer to a user's query.",
 )
-async def review(query: str = Field(description="The user's query"),
+def review(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response")) -> str:
-    review = await client.chat.complete_async(
+    review = client.chat.complete(
         model=model,
         messages=[
             {"role": "system", "content": "You are an assistant that reviews other LLMs' responses to users' queries."},
@@ -51,10 +51,10 @@ async def review(query: str = Field(description="The user's query"),
     title="Answer Refinement",
     description="Get a refined answer to a user's query according to a judge's review.",
 )
-async def refinement(query: str = Field(description="The user's query"),
+def refinement(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response"),
                            review: str = Field(description="The judge's review of the response")) -> str:
-    review = await client.chat.complete_async(
+    review = client.chat.complete(
         model=model,
         messages=[
             {"role": "user", "content": f"""You are provided a user's query, an LLM's response, and a judge's review of that response. Use the review to produce a refined version of the LLM's response. If the review says the response is good as is, return the original response. Do not precede your answer with any commentary.
@@ -78,7 +78,7 @@ async def refinement(query: str = Field(description="The user's query"),
     title="Answer Selection",
     description="Return the best of multiple LLM responses according to a judge."
 )
-async def selection(query: str = Field(description="The user's query"),
+def selection(query: str = Field(description="The user's query"),
                         responses: str = Field(description="Multiple LLM responses indexed from 1")
                         ) -> str:
     content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever. Do not precede your answer with any commentary and do not include the index.
@@ -89,7 +89,7 @@ async def selection(query: str = Field(description="The user's query"),
     LLM responses:
     {responses}
     """
-    response = await client.chat.complete_async(
+    response = client.chat.complete(
         model=model,
         messages=[
             {"role": "user", "content": content},
@@ -102,27 +102,27 @@ async def selection(query: str = Field(description="The user's query"),
     title="Review, Refine, Select",
     description="Given a user's query and an LLM's response, get multiple reviews and refinements of the response, then select the best refined response. This sends you one node deeper in the Monte Carlo Tree Search.",
 )
-async def rrs(query: str = Field(description="The user's query"),
+def rrs(query: str = Field(description="The user's query"),
                       response: str = Field(description="The LLM's response"),
                       width: int = Field(description="The number of reviews and refinements to generate")) -> str:
     responses = ""
     for i in range(width):
-        rvw = await review(query=query, response=response)
-        rfnmnt = await refinement(query=query, response=response, review=rvw)
+        rvw = review(query=query, response=response)
+        rfnmnt = refinement(query=query, response=response, review=rvw)
         responses += f"Response {i+1}:\n {rfnmnt}\n\n"
-    slctn = await selection(query=query, responses=responses)
+    slctn = selection(query=query, responses=responses)
     return slctn
 
 @mcp.tool(
     title="Monte Carlo Tree Search",
     description="Given a user's query, get an LLM's response, multiple reviews and refinements of the response, then select the best refined response. Then get multiple reviews and refinements again, select the best one, and repeat this until it reaches a specified height.",
 )
-async def Monte_Carlo_Tree_Search(query: str = Field(description="The user's query"),
+def Monte_Carlo_Tree_Search(query: str = Field(description="The user's query"),
                 width: int = Field(description="The width of the search tree"),
                 height: int = Field(description="The height of the search tree (including the root)")) -> str:
-    response = await original_response(query=query)
+    response = original_response(query=query)
     for _ in range(height - 1):
-        response = await rrs(query=query, response=response, width=width)
+        response = rrs(query=query, response=response, width=width)
     return response
 
 if __name__ == "__main__":
