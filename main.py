@@ -5,8 +5,9 @@ import mcp.types as types
 import os
 
 mcp = FastMCP("Alim Server", port=3000, stateless_http=True, debug=True)
-model = "ministral-3b-2410"
+model = "mistral-medium-2508"
 client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+temperature = 1.3
 
 @mcp.tool(
     title="LLM Call",
@@ -18,7 +19,7 @@ async def original_response(query: str = Field(description="The user's query")) 
         messages=[
             {"role": "user", "content": query},
         ],
-        temperature=0.7
+        temperature=temperature
     )
     return response.choices[0].message.content
 
@@ -42,7 +43,7 @@ async def review(query: str = Field(description="The user's query"),
             """
             },
         ],
-        temperature=0.7,
+        temperature=temperature,
     )
     return review.choices[0].message.content
 
@@ -70,7 +71,7 @@ async def refinement(query: str = Field(description="The user's query"),
             """
             },
         ],
-        temperature=0.7,
+        temperature=temperature,
     )
     return review.choices[0].message.content
 
@@ -94,7 +95,7 @@ async def selection(query: str = Field(description="The user's query"),
         messages=[
             {"role": "user", "content": content},
         ],
-        temperature=0.7
+        temperature=temperature,
     )
     return response.choices[0].message.content
 
