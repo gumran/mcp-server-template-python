@@ -58,7 +58,7 @@ async def refinement(query: str = Field(description="The user's query"),
         model=model,
         messages=[
             {"role": "system", "content": "You are an assistant that refines other LLMs' messages based on a judge's feedback."},
-            {"role": "user", "content": f"""You are provided a user's query, an LLM's response, and a judge's review of that response. Use the review to produce a refined version of the LLM's response. Do not precede your answer with any commentary. If the review says the response is good as is, return the original response.
+            {"role": "user", "content": f"""You are provided a user's query, an LLM's response, and a judge's review of that response. Use the review to produce a refined version of the LLM's response. If the review says the response is good as is, return the original response. Do not precede your answer with any commentary.
 
             User's query:
             {query}
