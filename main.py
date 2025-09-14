@@ -24,6 +24,33 @@ async def original_response(query: str = Field(description="The user's query")) 
     return response.choices[0].message.content
 
 @mcp.tool(
+    title="Review, Refine, Select",
+    description="Given a user's query and an LLM's response, get w reviews and refinements of the response, then select the best refined response. Expects the user's original query, the LLM's response to the query, and w.",
+)
+async def rrs(query: str = Field(description="The user's query"),
+                      response: str = Field(description="The LLM's response"),
+                      w: int = Field(description="The number of reviews and refinements to generate")) -> str:
+    responses = ""
+    for i in range(w):
+        review = await review(query=query, response=response)
+        refinement = await refinement(query=query, response=response, review=review)
+        responses += f"Response {i+1}:\n {refinement}\n\n"
+    selection = await selection(query=query, responses=responses)
+    return selection
+
+@mcp.tool(
+    title="Monte Carlo Tree Search",
+    description="Given a user's query, get an LLM's response, get w reviews and refinements of the response, then select the best refined response. Repeat this process for d iterations. Expects the user's original query, the LLM's response to the query, w, and d.",
+)
+async def mcts(query: str = Field(description="The user's query"),
+                w: int = Field(description="The number of reviews and refinements to generate"),
+                d: int = Field(description="The number of iterations to perform")) -> str:
+    response = await original_response(query=query)
+    for _ in range(d - 1):
+        response = await rrs(query=query, response=response, w=w)
+    return response
+
+@mcp.tool(
     title="Answer Review",
     description="Get a review of an answer to a user's query. Expects the user's original query and the LLM's latest response to the query.",
 )
