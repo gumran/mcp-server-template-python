@@ -117,7 +117,7 @@ async def rrs(query: str = Field(description="The user's query"),
     title="Monte Carlo Tree Search",
     description="Given a user's query, get an LLM's response, get w reviews and refinements of the response, then select the best refined response. Repeat this process for d iterations. Expects the user's original query, the LLM's response to the query, w, and d.",
 )
-async def mcts(query: str = Field(description="The user's query"),
+async def Monte_Carlo_Tree_Search(query: str = Field(description="The user's query"),
                 w: int = Field(description="The width of the search tree"),
                 d: int = Field(description="The depth of the search tree")) -> str:
     response = await original_response(query=query)
