@@ -9,10 +9,10 @@ model = "mistral-small-2506"
 client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 temperature = 1.3
 
-# @mcp.tool(
-#     title="LLM Call",
-#     description="Call another LLM and return its response.",
-# )
+@mcp.tool(
+    title="LLM Call",
+    description="Call another LLM and return its response.",
+)
 async def original_response(query: str = Field(description="The user's query")) -> str:
     response = await client.chat.complete_async(
         model=model,
@@ -23,37 +23,10 @@ async def original_response(query: str = Field(description="The user's query")) 
     )
     return response.choices[0].message.content
 
-# @mcp.tool(
-#     title="Review, Refine, Select",
-#     description="Given a user's query and an LLM's response, get w reviews and refinements of the response, then select the best refined response. Expects the user's original query, the LLM's response to the query, and w.",
-# )
-async def rrs(query: str = Field(description="The user's query"),
-                      response: str = Field(description="The LLM's response"),
-                      w: int = Field(description="The number of reviews and refinements to generate")) -> str:
-    responses = ""
-    for i in range(w):
-        review = await review(query=query, response=response)
-        refinement = await refinement(query=query, response=response, review=review)
-        responses += f"Response {i+1}:\n {refinement}\n\n"
-    selection = await selection(query=query, responses=responses)
-    return selection
-
 @mcp.tool(
-    title="Monte Carlo Tree Search",
-    description="Given a user's query, get an LLM's response, get w reviews and refinements of the response, then select the best refined response. Repeat this process for d iterations. Expects the user's original query, the LLM's response to the query, w, and d.",
+    title="Answer Review",
+    description="Get a review of an answer to a user's query. Expects the user's original query and the LLM's latest response to the query.",
 )
-async def MCTS(query: str = Field(description="The user's query"),
-                w: int = Field(description="The width of the search tree"),
-                d: int = Field(description="The depth of the search tree")) -> str:
-    response = await original_response(query=query)
-    for _ in range(d - 1):
-        response = await rrs(query=query, response=response, w=w)
-    return response
-
-# @mcp.tool(
-#     title="Answer Review",
-#     description="Get a review of an answer to a user's query. Expects the user's original query and the LLM's latest response to the query.",
-# )
 async def review(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response")) -> str:
     review = await client.chat.complete_async(
@@ -74,10 +47,10 @@ async def review(query: str = Field(description="The user's query"),
     )
     return review.choices[0].message.content
 
-# @mcp.tool(
-#     title="Answer Refinement",
-#     description="Get a refined answer to a user's query. Expects the user's query, the LLM's response to the query, and the judge's review of that response.",
-# )
+@mcp.tool(
+    title="Answer Refinement",
+    description="Get a refined answer to a user's query. Expects the user's query, the LLM's response to the query, and the judge's review of that response.",
+)
 async def refinement(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response"),
                            review: str = Field(description="The judge's review of the response")) -> str:
@@ -102,11 +75,10 @@ async def refinement(query: str = Field(description="The user's query"),
     )
     return review.choices[0].message.content
 
-
-# @mcp.tool(
-#     title="Answer Selection",
-#     description="Get the index of the best of multiple LLM responses according to an external judge. Expects the user's original query and multiple LLM responses indexed from 1."
-# )
+@mcp.tool(
+    title="Answer Selection",
+    description="Get the index of the best of multiple LLM responses according to an external judge. Expects the user's original query and multiple LLM responses indexed from 1."
+)
 async def selection(query: str = Field(description="The user's query"),
                         responses: str = Field(description="Multiple LLM responses indexed from 1")) -> str:
     content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever. Do not precede your answer with any commentary.
@@ -125,6 +97,34 @@ async def selection(query: str = Field(description="The user's query"),
         temperature=temperature,
     )
     return response.choices[0].message.content
+
+@mcp.tool(
+    title="Review, Refine, Select",
+    description="Given a user's query and an LLM's response, get w reviews and refinements of the response, then select the best refined response. Expects the user's original query, the LLM's response to the query, and w.",
+)
+async def rrs(query: str = Field(description="The user's query"),
+                      response: str = Field(description="The LLM's response"),
+                      w: int = Field(description="The number of reviews and refinements to generate")) -> str:
+    responses = ""
+    for i in range(w):
+        review = await review(query=query, response=response)
+        refinement = await refinement(query=query, response=response, review=review)
+        responses += f"Response {i+1}:\n {refinement}\n\n"
+    selection = await selection(query=query, responses=responses)
+    return selection
+
+@mcp.tool(
+    title="Monte Carlo Tree Search",
+    description="Given a user's query, get an LLM's response, get w reviews and refinements of the response, then select the best refined response. Repeat this process for d iterations. Expects the user's original query, the LLM's response to the query, w, and d.",
+)
+async def mcts(query: str = Field(description="The user's query"),
+                w: int = Field(description="The width of the search tree"),
+                d: int = Field(description="The depth of the search tree")) -> str:
+    response = await original_response(query=query)
+    for _ in range(d - 1):
+        response = await rrs(query=query, response=response, w=w)
+    return response
+
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
