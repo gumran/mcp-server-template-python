@@ -110,8 +110,8 @@ async def rrs(query: str = Field(description="The user's query"),
         rvw = await review(query=query, response=response)
         rfnmnt = await refinement(query=query, response=response, review=rvw)
         responses += f"Response {i+1}:\n {rfnmnt}\n\n"
-    selection = await selection(query=query, responses=responses)
-    return selection
+    slctn = await selection(query=query, responses=responses)
+    return slctn
 
 @mcp.tool(
     title="Monte Carlo Tree Search",
@@ -124,7 +124,6 @@ async def mcts(query: str = Field(description="The user's query"),
     for _ in range(d - 1):
         response = await rrs(query=query, response=response, w=w)
     return response
-
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
