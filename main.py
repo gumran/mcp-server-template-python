@@ -107,9 +107,9 @@ async def rrs(query: str = Field(description="The user's query"),
                       w: int = Field(description="The number of reviews and refinements to generate")) -> str:
     responses = ""
     for i in range(w):
-        review = await review(query=query, response=response)
-        refinement = await refinement(query=query, response=response, review=review)
-        responses += f"Response {i+1}:\n {refinement}\n\n"
+        rvw = await review(query=query, response=response)
+        rfnmnt = await refinement(query=query, response=response, review=rvw)
+        responses += f"Response {i+1}:\n {rfnmnt}\n\n"
     selection = await selection(query=query, responses=responses)
     return selection
 
