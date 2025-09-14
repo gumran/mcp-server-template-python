@@ -1,7 +1,9 @@
 # MCP Server for Running Monte Carlo Tree Search in Le Chat
 
 This repository implements an MCP server with tools used to allow Mistral's Le Chat run an inference-time compute technique called (Standard) Monte Carlo Tree Search (MCTS).
+
 <img width="354" height="185" alt="image" src="https://github.com/user-attachments/assets/9908d3df-9b45-4a53-911c-369b0a674543" />
+
 Image from Sakana AI: https://arxiv.org/pdf/2503.04412
 
 ## How it works
