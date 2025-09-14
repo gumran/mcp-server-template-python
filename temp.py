@@ -30,25 +30,25 @@ def sequential_refinement(
         temperature=0.7
     )
 
-        content = f"""You are provided a user's query, an LLM's response, and a review of that response. Please improve the LLM's response based on the review. If the review says the response is good as is, return the original response.
+    content = f"""You are provided a user's query, an LLM's response, and a review of that response. Please improve the LLM's response based on the review. If the review says the response is good as is, return the original response.
 
-        User's query:
-        {query}
+    User's query:
+    {query}
 
-        LLM's response:
-        {response.choices[0].message.content}
+    LLM's response:
+    {response}
 
-        Review:
-        {review.choices[0].message.content}
-        """
-        response = client.chat.complete(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are an assistant that improves other LLMs' responses based on reviews."},
-                {"role": "user", "content": content},
-            ],
-        )
+    Review:
+    {review.choices[0].message.content}
+    """
+    response = client.chat.complete(
+        model=model,
+        messages=[
+            {"role": "system", "content": "You are an assistant that improves other LLMs' responses based on reviews."},
+            {"role": "user", "content": content},
+        ],
+    )
     return response.choices[0].message.content
 
 
-print(sequential_refinement("If you double the mass of an object but keep the same kinetic energy, what happens to its velocity?"))
+print(sequential_refinement("If you double the mass of an object but keep the same kinetic energy, what happens to its velocity?", "it remains the same"))

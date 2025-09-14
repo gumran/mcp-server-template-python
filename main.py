@@ -7,7 +7,7 @@ import os
 mcp = FastMCP("KZ Server", port=3000, stateless_http=True, debug=True)
 model = "mistral-small-2506"
 client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
-temperature = 1.3
+temperature = 1.5
 
 @mcp.tool(
     title="LLM Call",
@@ -75,6 +75,16 @@ def refinement(query: str = Field(description="The user's query"),
     return review.choices[0].message.content
 
 @mcp.tool(
+    title="Review and Refine",
+    description="Given a user's query and an LLM's response, get a review of the response and then a refinement of the response based on the review.",
+)
+def branching(query: str = Field(description="The user's query"),
+               response: str = Field(description="The LLM's response")) -> str:
+    rvw = review(query=query, response=response)
+    rfnd = refinement(query=query, response=response, review=rvw)
+    return rfnd
+
+@mcp.tool(
     title="Answer Selection",
     description="Return the best of multiple LLM responses according to a judge."
 )
@@ -98,32 +108,32 @@ def selection(query: str = Field(description="The user's query"),
     )
     return response.choices[0].message.content
 
-@mcp.tool(
-    title="Review, Refine, Select",
-    description="Given a user's query and an LLM's response, get multiple reviews and refinements of the response, then select the best refined response. This sends you one node deeper in the Monte Carlo Tree Search.",
-)
-def rrs(query: str = Field(description="The user's query"),
-                      response: str = Field(description="The LLM's response"),
-                      width: int = Field(description="The number of reviews and refinements to generate")) -> str:
-    responses = ""
-    for i in range(width):
-        rvw = review(query=query, response=response)
-        rfnmnt = refinement(query=query, response=response, review=rvw)
-        responses += f"Response {i+1}:\n {rfnmnt}\n\n"
-    slctn = selection(query=query, responses=responses)
-    return slctn
+# @mcp.tool(
+#     title="Review, Refine, Select",
+#     description="Given a user's query and an LLM's response, get multiple reviews and refinements of the response, then select the best refined response. This sends you one node deeper in the Monte Carlo Tree Search.",
+# )
+# def rrs(query: str = Field(description="The user's query"),
+#                       response: str = Field(description="The LLM's response"),
+#                       width: int = Field(description="The number of reviews and refinements to generate")) -> str:
+#     responses = ""
+#     for i in range(width):
+#         rvw = review(query=query, response=response)
+#         rfnmnt = refinement(query=query, response=response, review=rvw)
+#         responses += f"Response {i+1}:\n {rfnmnt}\n\n"
+#     slctn = selection(query=query, responses=responses)
+#     return slctn
 
-@mcp.tool(
-    title="Monte Carlo Tree Search",
-    description="Given a user's query, get an LLM's response, multiple reviews and refinements of the response, then select the best refined response. Then get multiple reviews and refinements again, select the best one, and repeat this until it reaches a specified height.",
-)
-def Monte_Carlo_Tree_Search(query: str = Field(description="The user's query"),
-                width: int = Field(description="The width of the search tree"),
-                height: int = Field(description="The height of the search tree (including the root)")) -> str:
-    response = original_response(query=query)
-    for _ in range(height - 1):
-        response = rrs(query=query, response=response, width=width)
-    return response
+# @mcp.tool(
+#     title="Monte Carlo Tree Search",
+#     description="Given a user's query, get an LLM's response, multiple reviews and refinements of the response, then select the best refined response. Then get multiple reviews and refinements again, select the best one, and repeat this until it reaches a specified height.",
+# )
+# def Monte_Carlo_Tree_Search(query: str = Field(description="The user's query"),
+#                 width: int = Field(description="The width of the search tree"),
+#                 height: int = Field(description="The height of the search tree (including the root)")) -> str:
+#     response = original_response(query=query)
+#     for _ in range(height - 1):
+#         response = rrs(query=query, response=response, width=width)
+#     return response
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
