@@ -4,16 +4,16 @@ from mistralai import Mistral
 import mcp.types as types
 import os
 
-mcp = FastMCP("Echo Server", port=3000, stateless_http=True, debug=True)
+mcp = FastMCP("Alim Server", port=3000, stateless_http=True, debug=True)
+model = "ministral-3b-2410"
+client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
 @mcp.tool(
     title="LLM Call",
     description="Call another LLM and return its response.",
 )
 async def original_response(query: str = Field(description="The user's query")) -> str:
-    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
-    model = "mistral-large-latest"
-    response = client.chat.complete(
+    response = await client.chat.complete_async(
         model=model,
         messages=[
             {"role": "user", "content": query},
@@ -28,10 +28,7 @@ async def original_response(query: str = Field(description="The user's query")) 
 )
 async def review(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response")) -> str:
-    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
-    model = "mistral-large-latest"
-
-    review = client.chat.complete(
+    review = await client.chat.complete_async(
         model=model,
         messages=[
             {"role": "system", "content": "You are an assistant that reviews other LLMs' responses to users' queries."},
@@ -51,15 +48,12 @@ async def review(query: str = Field(description="The user's query"),
 
 @mcp.tool(
     title="Answer Refinement",
-    description="Get a refined answer to a user's query. Expects the user's query, the LLM's response  the query, and the judge's review of that response.",
+    description="Get a refined answer to a user's query. Expects the user's query, the LLM's response to the query, and the judge's review of that response.",
 )
 async def refinement(query: str = Field(description="The user's query"),
                            response: str = Field(description="The LLM's response"),
                            review: str = Field(description="The judge's review of the response")) -> str:
-    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
-    model = "mistral-large-latest"
-
-    review = client.chat.complete(
+    review = await client.chat.complete_async(
         model=model,
         messages=[
             {"role": "system", "content": "You are an assistant that refines other LLMs' messages based on a judge's feedback."},
@@ -86,11 +80,8 @@ async def refinement(query: str = Field(description="The user's query"),
     description="Get the index of the best of multiple LLM responses according to an external judge. Expects the user's original query and multiple LLM responses indexed from 1."
 )
 async def selection(query: str = Field(description="The user's query"),
-                           responses: str = Field(description="Multiple LLM responses indexed from 1")) -> str:
-    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
-    model = "mistral-large-latest"
-
-    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return the index of that response. If multiple responses are equally good, return the first one among them. Only return the index and nothing else.
+                        responses: str = Field(description="Multiple LLM responses indexed from 1")) -> str:
+    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever.
 
     User's query:
     {query}
@@ -98,7 +89,7 @@ async def selection(query: str = Field(description="The user's query"),
     LLM responses:
     {responses}
     """
-    response = client.chat.complete(
+    response = await client.chat.complete_async(
         model=model,
         messages=[
             {"role": "user", "content": content},
