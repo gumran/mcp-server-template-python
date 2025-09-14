@@ -5,7 +5,7 @@ import mcp.types as types
 import os
 
 mcp = FastMCP("Alim Server", port=3000, stateless_http=True, debug=True)
-model = "mistral-medium-2508"
+model = "mistral-small-2506"
 client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 temperature = 1.3
 
@@ -82,7 +82,7 @@ async def refinement(query: str = Field(description="The user's query"),
 )
 async def selection(query: str = Field(description="The user's query"),
                         responses: str = Field(description="Multiple LLM responses indexed from 1")) -> str:
-    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever.
+    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever. Do not precede your answer with any commentary.
 
     User's query:
     {query}
