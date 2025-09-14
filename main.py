@@ -81,7 +81,7 @@ async def refinement(query: str = Field(description="The user's query"),
 )
 async def selection(query: str = Field(description="The user's query"),
                         responses: str = Field(description="Multiple LLM responses indexed from 1")) -> str:
-    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever. Do not precede your answer with any commentary.
+    content = f"""You are provided a user's query and multiple LLM responses to that query. Your job is to select the best response among them. If there is a clear best response, return that response with no change whatsoever. If multiple responses are equally good, return the first one among them with no change whatsoever. Do not precede your answer with any commentary and do not include the index.
 
     User's query:
     {query}
